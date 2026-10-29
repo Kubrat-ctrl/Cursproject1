@@ -20,6 +20,7 @@ class UserResource extends JsonResource
             'role' => $this->role->value,
             'phone' => $this->phone,
             'avatar_path' => $this->avatar_path,
+            'blocked' => $this->blocked_at !== null,
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }
