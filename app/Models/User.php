@@ -66,4 +66,10 @@ class User extends Authenticatable
             ->withPivot(['id', 'membership_id', 'status', 'cancelled_at'])
             ->withTimestamps();
     }
+
+    /** Администратор ли пользователь (для политик). */
+    public function isAdmin(): bool
+    {
+        return $this->role === UserRole::Admin;
+    }
 }
