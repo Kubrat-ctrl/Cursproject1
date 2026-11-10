@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\BusinessException;
 use App\Models\Workout;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -59,7 +60,7 @@ class WorkoutService
         // Внешний ключ schedule_items.workout_id защищён restrictOnDelete (ПР3),
         // поэтому конфликт проверяем заранее и возвращаем 409, а не ошибку БД.
         if ($workout->scheduleItems()->exists()) {
-            abort(409, 'Нельзя удалить вид занятия, который есть в расписании. Отключите его: is_active = false.');
+            throw BusinessException::conflict('Нельзя удалить вид занятия, который есть в расписании. Отключите его: is_active = false');
         }
 
         $this->deleteImage($workout);

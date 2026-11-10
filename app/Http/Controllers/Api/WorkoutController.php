@@ -20,7 +20,17 @@ class WorkoutController extends Controller
     {
     }
 
-    /** GET /api/v1/workouts */
+    /**
+     * Список видов занятий (с пагинацией)
+     *
+     * Доступ: любой, в том числе гость.
+     *
+     * @group Виды занятий
+     * @queryParam level string Фильтр по уровню: beginner, intermediate, advanced. Example: beginner
+     * @queryParam page integer Номер страницы. Example: 1
+     * @response 200 {"data": [{"id": 1, "name": "Сайкл", "description": "Кардио на велотренажёрах", "duration_minutes": 50, "level": "intermediate", "image_path": null, "image_url": null, "is_active": true}], "links": {"first": "...", "last": "...", "prev": null, "next": "..."}, "meta": {"current_page": 1, "last_page": 1, "per_page": 15, "total": 1}}
+     * @response 422 {"message": "Ошибка валидации", "errors": {"field": ["Сообщение об ошибке"]}}
+     */
     public function index(Request $request): AnonymousResourceCollection
     {
         return WorkoutResource::collection(
@@ -28,7 +38,16 @@ class WorkoutController extends Controller
         );
     }
 
-    /** GET /api/v1/workouts/{workout}; при несуществующем id Laravel вернёт 404. */
+    /**
+     * Один вид занятия
+     *
+     * Доступ: любой, в том числе гость.
+     *
+     * @group Виды занятий
+     * @urlParam workout integer required Идентификатор вида занятия. Example: 1
+     * @response 200 {"data": {"id": 1, "name": "Сайкл", "description": "Кардио на велотренажёрах", "duration_minutes": 50, "level": "intermediate", "image_path": null, "image_url": null, "is_active": true}}
+     * @response 404 {"message": "Вид занятия не найден"}
+     */
     public function show(Workout $workout): WorkoutResource
     {
         return new WorkoutResource($workout);
@@ -50,7 +69,20 @@ class WorkoutController extends Controller
         );
     }
 
-    /** DELETE /api/v1/workouts/{workout} */
+    /**
+     * Удаление вида занятия
+     *
+     * Доступ: администратор.
+     *
+     * @group Виды занятий
+     * @authenticated
+     * @urlParam workout integer required Идентификатор. Example: 1
+     * @response 204 
+     * @response 401 {"message": "Требуется авторизация"}
+     * @response 403 {"message": "Недостаточно прав для этого действия"}
+     * @response 404 {"message": "Вид занятия не найден"}
+     * @response 409 {"message": "Нельзя удалить вид занятия, который есть в расписании. Отключите его: is_active = false"}
+     */
     public function destroy(Workout $workout): Response
     {
         $this->workouts->delete($workout);

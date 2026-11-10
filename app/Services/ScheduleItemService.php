@@ -4,25 +4,28 @@ namespace App\Services;
 
 use App\Enums\BookingStatus;
 use App\Enums\ScheduleStatus;
+use App\Exceptions\BusinessException;
 use App\Models\ScheduleItem;
+use App\Models\WorkoutBooking;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class ScheduleItemService
 {
-    /** Расписание с фильтрами и постраничным выводом, по возрастанию времени начала. */
-    public function paginate(array $filters): LengthAwarePaginator
+    /** Расписание: фильтры, поиск, сортировка по белому списку и пагинация. */
+    public function list(array $p): LengthAwarePaginator
     {
         return ScheduleItem::query()
             ->with(['workout', 'trainer'])
             ->withCount(['bookings' => fn ($q) => $q->where('status', BookingStatus::Booked->value)])
-            ->when($filters['trainer_id'] ?? null, fn ($q, $id) => $q->where('trainer_id', $id))
-            ->when($filters['workout_id'] ?? null, fn ($q, $id) => $q->where('workout_id', $id))
-            ->when($filters['date'] ?? null, fn ($q, $date) => $q->whereDate('starts_at', $date))
-            ->orderBy('starts_at')
-            ->paginate(15)
+            ->filter($p)
+            ->search($p['search'] ?? null)
+            ->orderBy($p['sort'] ?? 'starts_at', $p['order'] ?? 'asc')
+            ->orderBy('id')
+            ->paginate($p['per_page'] ?? 15)
             ->withQueryString();
     }
 
@@ -45,7 +48,7 @@ class ScheduleItemService
     public function update(ScheduleItem $item, array $data): ScheduleItem
     {
         if ($item->status === ScheduleStatus::Cancelled) {
-            abort(409, 'Отменённое занятие изменять нельзя.');
+            throw BusinessException::conflict('Отменённое занятие изменять нельзя');
         }
 
         $trainerId = $data['trainer_id'] ?? $item->trainer_id;
@@ -61,7 +64,7 @@ class ScheduleItemService
         if (isset($data['capacity'])) {
             $booked = $item->bookings()->where('status', BookingStatus::Booked->value)->count();
             if ($data['capacity'] < $booked) {
-                abort(409, "Нельзя уменьшить число мест: на занятие уже записано {$booked}.");
+                throw BusinessException::conflict("Нельзя уменьшить число мест: на занятие уже записано {$booked}");
             }
         }
 
@@ -73,24 +76,37 @@ class ScheduleItemService
     }
 
     /** Отмена занятия: все действующие записи отменяются, посещения возвращаются на абонементы. */
-    public function cancel(ScheduleItem $item): ScheduleItem
+    public function cancel(ScheduleItem $scheduleItem): ScheduleItem
     {
-        if ($item->status === ScheduleStatus::Cancelled) {
-            abort(409, 'Занятие уже отменено.');
-        }
-        if ($item->starts_at->isPast()) {
-            abort(409, 'Нельзя отменить занятие, которое уже началось.');
-        }
+        $item = DB::transaction(function () use ($scheduleItem) {
+            $item = ScheduleItem::query()
+                ->whereKey($scheduleItem->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        DB::transaction(function () use ($item) {
+            if (! $item->status->canTransitionTo(ScheduleStatus::Cancelled)) {
+                throw BusinessException::conflict('Занятие уже отменено');
+            }
+            if ($item->starts_at->isPast()) {
+                throw BusinessException::unprocessable('Нельзя отменить занятие, которое уже началось');
+            }
+
             $item->update(['status' => ScheduleStatus::Cancelled]);
 
-            $item->bookings()
+            $cancelledBookings = WorkoutBooking::query()
+                ->where('schedule_item_id', $item->id)
                 ->where('status', BookingStatus::Booked->value)
                 ->update([
                     'status' => BookingStatus::Cancelled->value,
                     'cancelled_at' => now(),
                 ]);
+
+            Log::warning('Занятие отменено администратором', [
+                'schedule_item_id' => $item->id,
+                'cancelled_bookings' => $cancelledBookings,
+            ]);
+
+            return $item;
         });
 
         return $this->details($item->refresh());
@@ -108,7 +124,7 @@ class ScheduleItemService
             ->exists();
 
         if ($busy) {
-            abort(409, 'У тренера уже есть занятие в это время.');
+            throw BusinessException::conflict('У тренера уже есть занятие в это время');
         }
     }
 

@@ -79,6 +79,10 @@ Route::prefix('v1')->name('v1.')->group(function () {
 
             Route::get('reports/memberships-sales', [ReportController::class, 'membershipsSales'])
                 ->name('reports.memberships-sales');
+            Route::get('reports/bookings-by-status', [ReportController::class, 'bookingsByStatus'])
+                ->name('reports.bookings-by-status');
+            Route::get('reports/popular-workouts', [ReportController::class, 'popularWorkouts'])
+                ->name('reports.popular-workouts');
         });
 
         // Клиент

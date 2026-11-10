@@ -57,6 +57,7 @@ class WorkoutBooking extends Pivot
 
     public function visit(): HasOne
     {
-        return $this->hasOne(Visit::class);
+        // Внешний ключ указан явно: у промежуточной модели Pivot он не определяется автоматически.
+        return $this->hasOne(Visit::class, 'workout_booking_id');
     }
 }

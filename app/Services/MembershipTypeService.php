@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\BusinessException;
 use App\Models\MembershipType;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -38,7 +39,7 @@ class MembershipTypeService
         // Тип, по которому продавались абонементы, удалять нельзя (restrictOnDelete, ПР3):
         // его снимают с продажи через is_active = false.
         if ($type->memberships()->exists()) {
-            abort(409, 'Нельзя удалить тип, по которому продавались абонементы. Снимите его с продажи: is_active = false.');
+            throw BusinessException::conflict('Нельзя удалить тип, по которому продавались абонементы. Снимите его с продажи: is_active = false');
         }
 
         $type->delete();

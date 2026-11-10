@@ -17,16 +17,27 @@ class MembershipController extends Controller
     {
     }
 
+    /**
+     * Абонементы текущего клиента с остатком посещений
+     *
+     * Доступ: клиент.
+     *
+     * @group Абонементы клиента
+     * @authenticated
+     * @response 200 {"data": [{"id": 4, "starts_on": "2026-11-01", "ends_on": "2026-12-01", "price_paid": "3500.00", "status": "active", "used_visits": 3, "visits_left": 9, "membership_type": {"id": 2, "name": "Месяц, 12 посещений"}}]}
+     * @response 401 {"message": "Требуется авторизация"}
+     * @response 403 {"message": "Недостаточно прав для этого действия"}
+     */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $user = $this->actingUser($request);
+        $user = $request->user();
 
         return MembershipResource::collection($this->memberships->listFor($user));
     }
 
     public function store(PurchaseMembershipRequest $request): JsonResponse
     {
-        $user = $this->actingUser($request);
+        $user = $request->user();
         $type = MembershipType::findOrFail($request->validated('membership_type_id'));
 
         $membership = $this->memberships->purchase($user, $type);

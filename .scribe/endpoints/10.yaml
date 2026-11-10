@@ -1,0 +1,98 @@
+name: Посещения
+description: ''
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/v1/bookings/{booking_id}/visit'
+    metadata:
+      custom: []
+      groupName: Посещения
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Отметка посещения. Доступна не раньше чем за 30 минут до начала занятия'
+      description: 'Доступ: тренер (своё занятие) или администратор.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      booking_id:
+        custom: []
+        name: booking_id
+        description: 'The ID of the booking.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      booking:
+        custom: []
+        name: booking
+        description: 'Идентификатор записи.'
+        required: true
+        example: 15
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      booking_id: 16
+      booking: 15
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 201
+        content: '{"data": {"id": 7, "checked_in_at": "2026-11-10T09:45:00+05:00"}}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 401
+        content: '{"message": "Требуется авторизация"}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 403
+        content: '{"message": "Недостаточно прав для этого действия"}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 404
+        content: '{"message": "Запись на занятие не найдена"}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 409
+        content: '{"message": "Посещение уже отмечено"}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 422
+        content: '{"message": "Отмечать посещение можно не раньше чем за 30 минут до начала занятия"}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null

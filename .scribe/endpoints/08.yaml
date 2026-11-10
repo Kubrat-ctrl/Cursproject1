@@ -1,0 +1,56 @@
+name: 'Абонементы клиента'
+description: ''
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/memberships
+    metadata:
+      custom: []
+      groupName: 'Абонементы клиента'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Абонементы текущего клиента с остатком посещений'
+      description: 'Доступ: клиент.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data": [{"id": 4, "starts_on": "2026-11-01", "ends_on": "2026-12-01", "price_paid": "3500.00", "status": "active", "used_visits": 3, "visits_left": 9, "membership_type": {"id": 2, "name": "Месяц, 12 посещений"}}]}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 401
+        content: '{"message": "Требуется авторизация"}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 403
+        content: '{"message": "Недостаточно прав для этого действия"}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null

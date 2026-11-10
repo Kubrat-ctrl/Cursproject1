@@ -19,7 +19,15 @@ class MembershipTypeController extends Controller
     {
     }
 
-    /** GET /api/v1/membership-types */
+    /**
+     * Список типов абонементов
+     *
+     * Доступ: любой, в том числе гость.
+     *
+     * @group Типы абонементов
+     * @queryParam is_active boolean Только действующие тарифы. Example: true
+     * @response 200 {"data": [{"id": 2, "name": "Месяц, 12 посещений", "price": "3500.00", "duration_days": 30, "visits_limit": 12, "is_active": true}], "links": {"first": "...", "last": "...", "prev": null, "next": "..."}, "meta": {"current_page": 1, "last_page": 1, "per_page": 15, "total": 1}}
+     */
     public function index(Request $request): AnonymousResourceCollection
     {
         return MembershipTypeResource::collection(
@@ -41,7 +49,20 @@ class MembershipTypeController extends Controller
         return (new MembershipTypeResource($type))->response()->setStatusCode(201);
     }
 
-    /** PUT|PATCH /api/v1/membership-types/{membership_type}; сюда же относится снятие с продажи (is_active = false). */
+    /**
+     * Изменение типа абонемента
+     *
+     * Доступ: администратор.
+     *
+     * @group Типы абонементов
+     * @authenticated
+     * @urlParam membership_type integer required Идентификатор. Example: 2
+     * @response 200 {"data": {"id": 2, "name": "Месяц, 12 посещений", "price": "3500.00", "duration_days": 30, "visits_limit": 12, "is_active": true}}
+     * @response 401 {"message": "Требуется авторизация"}
+     * @response 403 {"message": "Недостаточно прав для этого действия"}
+     * @response 404 {"message": "Тип абонемента не найден"}
+     * @response 422 {"message": "Ошибка валидации", "errors": {"field": ["Сообщение об ошибке"]}}
+     */
     public function update(UpdateMembershipTypeRequest $request, MembershipType $membershipType): MembershipTypeResource
     {
         return new MembershipTypeResource(

@@ -1,0 +1,163 @@
+name: Отчёты
+description: ''
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/reports/memberships-sales
+    metadata:
+      custom: []
+      groupName: Отчёты
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Продажи абонементов за период: количество и выручка по типам'
+      description: 'Доступ: администратор.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      from:
+        custom: []
+        name: from
+        description: 'date Начало периода.'
+        required: true
+        example: '2026-11-01'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      to:
+        custom: []
+        name: to
+        description: 'date Конец периода.'
+        required: true
+        example: '2026-11-30'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      from: '2026-11-01'
+      to: '2026-11-30'
+    bodyParameters:
+      from:
+        custom: []
+        name: from
+        description: 'Must be a valid date in the format <code>Y-m-d</code>.'
+        required: true
+        example: '2026-11-05'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      to:
+        custom: []
+        name: to
+        description: 'Must be a valid date in the format <code>Y-m-d</code>. validation.after_or_equal.'
+        required: true
+        example: '2052-11-28'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      from: '2026-11-05'
+      to: '2052-11-28'
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data": {"from": "2026-11-01", "to": "2026-11-30", "total_sold": 2, "total_revenue": 7000, "items": [{"membership_type_id": 2, "membership_type": "Месяц, 12 посещений", "sold": 2, "revenue": 7000}]}}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 401
+        content: '{"message": "Требуется авторизация"}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 403
+        content: '{"message": "Недостаточно прав для этого действия"}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 422
+        content: '{"message": "Ошибка валидации", "errors": {"field": ["Сообщение об ошибке"]}}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/reports/bookings-by-status
+    metadata:
+      custom: []
+      groupName: Отчёты
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Число записей по статусам'
+      description: 'Доступ: администратор.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data": {"booked": 24, "cancelled": 6}}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 401
+        content: '{"message": "Требуется авторизация"}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 403
+        content: '{"message": "Недостаточно прав для этого действия"}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null

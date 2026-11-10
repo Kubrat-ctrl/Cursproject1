@@ -4,8 +4,10 @@ namespace App\Services;
 
 use App\Enums\BookingStatus;
 use App\Enums\ScheduleStatus;
+use App\Exceptions\BusinessException;
 use App\Models\Visit;
 use App\Models\WorkoutBooking;
+use Illuminate\Support\Facades\Log;
 
 class VisitService
 {
@@ -16,22 +18,24 @@ class VisitService
         $item = $booking->scheduleItem;
 
         if ($booking->status !== BookingStatus::Booked) {
-            abort(409, 'Посещение можно отметить только для действующей записи.');
+            throw BusinessException::conflict('Посещение можно отметить только для действующей записи');
         }
         if ($item->status === ScheduleStatus::Cancelled) {
-            abort(409, 'Занятие отменено.');
+            throw BusinessException::conflict('Занятие отменено');
         }
         if ($booking->visit()->exists()) {
-            abort(409, 'Посещение уже отмечено.');
+            throw BusinessException::conflict('Посещение уже отмечено');
         }
         if ($item->starts_at->copy()->subMinutes(30)->isFuture()) {
-            abort(422, 'Отмечать посещение можно не раньше чем за 30 минут до начала занятия.');
+            throw BusinessException::unprocessable('Отмечать посещение можно не раньше чем за 30 минут до начала занятия');
         }
 
         $visit = new Visit();
         $visit->workout_booking_id = $booking->id;
         $visit->checked_in_at = now();
         $visit->save();
+
+        Log::info('Отмечено посещение', ['visit_id' => $visit->id, 'booking_id' => $booking->id]);
 
         return $visit->refresh();
     }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\BusinessException;
 use App\Models\Membership;
 use App\Models\MembershipType;
 use App\Models\ScheduleItem;
@@ -31,6 +32,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\EnsureUserHasRole::class,
         ]);
+
+        // Журнал всех запросов к API
+        $middleware->appendToGroup('api', \App\Http\Middleware\LogApiRequests::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Все запросы к /api/* получают ответ в JSON, даже без заголовка Accept
@@ -106,6 +110,13 @@ return Application::configure(basePath: dirname(__DIR__))
                 if ($code === 1062) {
                     return response()->json(['message' => 'Такая запись уже существует'], 409);
                 }
+            }
+        });
+
+        // 409 / 422: нарушение бизнес-правила (не HTTP-исключение, поэтому обработчик отдельный)
+        $exceptions->render(function (BusinessException $e, Request $request) {
+            if ($request->is('api/*')) {
+                return response()->json(['message' => $e->getMessage()], $e->status());
             }
         });
 

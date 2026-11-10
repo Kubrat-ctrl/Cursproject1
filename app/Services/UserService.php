@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\BusinessException;
 use App\Enums\ScheduleStatus;
 use App\Enums\UserRole;
 use App\Models\User;
@@ -30,7 +31,7 @@ class UserService
                 ->exists();
 
             if ($user->role === UserRole::Trainer && $newRole !== UserRole::Trainer && $hasUpcoming) {
-                abort(409, 'Нельзя снять роль тренера: у него есть предстоящие занятия.');
+                throw BusinessException::conflict('Нельзя снять роль тренера: у него есть предстоящие занятия');
             }
 
             $user->role = $newRole;
