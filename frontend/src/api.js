@@ -1,5 +1,6 @@
-// Единая точка обращения к API. Базовый адрес /api/v1 проксируется Vite на Laravel.
-const BASE = '/api/v1'
+// Единая точка обращения к API. Базовый адрес задаётся в .env клиента (VITE_API_URL).
+// Клиент (localhost:5173) и API (localhost:8000) — разные источники, поэтому нужен CORS на сервере.
+const BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
 const TOKEN_KEY = 'fc_token'
 
 export const getToken = () => localStorage.getItem(TOKEN_KEY)
