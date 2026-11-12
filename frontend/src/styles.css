@@ -52,3 +52,9 @@ table.props { border: none; background: none; margin: 12px 0; }
 table.props th { background: none; width: 180px; color: var(--muted); font-weight: 500; }
 .thumb.preview { max-width: 200px; height: 110px; }
 a.btn { display: inline-block; }
+
+/* Вход через Google и восстановление пароля */
+.google-btn { display:flex; justify-content:center; margin:6px 0 4px; min-height:44px; }
+.divider { display:flex; align-items:center; gap:10px; color:var(--muted); font-size:13px; margin:14px 0; }
+.divider::before, .divider::after { content:''; flex:1; border-top:1px solid var(--line); }
+.links { display:flex; justify-content:space-between; font-size:14px; margin:12px 0 0; }

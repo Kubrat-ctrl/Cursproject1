@@ -3,12 +3,15 @@ import { useAuth } from './auth'
 import Layout from './components/Layout'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 import Schedule from './pages/Schedule'
 import ScheduleDetail from './pages/ScheduleDetail'
 import Workouts from './pages/Workouts'
 import MembershipTypes from './pages/MembershipTypes'
 import MyMemberships from './pages/MyMemberships'
 import MyBookings from './pages/MyBookings'
+import Wallet from './pages/Wallet'
 import TrainerSchedule from './pages/TrainerSchedule'
 import AdminUsers from './pages/AdminUsers'
 import AdminReports from './pages/AdminReports'
@@ -33,8 +36,11 @@ export default function App() {
         <Route path="/membership-types" element={<MembershipTypes />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/my/memberships" element={<Guard roles={['client']}><MyMemberships /></Guard>} />
         <Route path="/my/bookings" element={<Guard roles={['client']}><MyBookings /></Guard>} />
+        <Route path="/my/wallet" element={<Guard roles={['client']}><Wallet /></Guard>} />
         <Route path="/trainer" element={<Guard roles={['trainer']}><TrainerSchedule /></Guard>} />
         <Route path="/admin/users" element={<Guard roles={['admin']}><AdminUsers /></Guard>} />
         <Route path="/admin/reports" element={<Guard roles={['admin']}><AdminReports /></Guard>} />

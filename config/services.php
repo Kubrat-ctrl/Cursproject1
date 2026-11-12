@@ -14,6 +14,11 @@ return [
     |
     */
 
+    'google' => [
+        // Client ID из Google Cloud Console (OAuth «Веб-приложение»); секрет не нужен
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+    ],
+
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
     ],

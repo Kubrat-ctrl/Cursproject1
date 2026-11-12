@@ -1,0 +1,43 @@
+Вход через Google и сброс пароля на реальную почту
+
+0. Перед копированием закоммитьте свои текущие изменения (git add . ; git commit), чтобы ничего не потерять:
+   архив заменит несколько существующих файлов (README.md, .env.example, config/app.php, config/services.php,
+   routes/api.php, app/Providers/AppServiceProvider.php, frontend/src/App.jsx, auth.jsx, Login.jsx,
+   Register.jsx, styles.css, frontend/.env.example). После копирования git diff покажет все изменения.
+
+1. Скопируйте содержимое архива в корень проекта Cursproject1 с заменой файлов.
+
+2. Google Cloud Console (https://console.cloud.google.com/):
+   - создайте проект;
+   - «API и сервисы» -> «Экран согласия OAuth»: тип «Внешний», название приложения, ваш email;
+     в «Тестовые пользователи» добавьте Gmail-адреса, которые будут входить;
+   - «Учётные данные» -> «Создать учётные данные» -> «Идентификатор клиента OAuth» -> «Веб-приложение»;
+   - «Разрешённые источники JavaScript»: http://localhost:5173
+   - скопируйте Client ID.
+
+3. .env сервера (файл .env, не .env.example):
+   GOOGLE_CLIENT_ID=ваш_client_id.apps.googleusercontent.com
+   FRONTEND_URL=http://localhost:5173
+   и настройки почты (Gmail: двухэтапная аутентификация -> «Пароли приложений» -> 16 символов):
+   MAIL_MAILER=smtp
+   MAIL_SCHEME=null
+   MAIL_HOST=smtp.gmail.com
+   MAIL_PORT=587
+   MAIL_USERNAME=ваш.адрес@gmail.com
+   MAIL_PASSWORD=пароль_приложения_без_пробелов
+   MAIL_FROM_ADDRESS=ваш.адрес@gmail.com
+   MAIL_FROM_NAME="Фитнес-клуб"
+
+4. frontend/.env:
+   VITE_API_URL=http://localhost:8000/api/v1
+   VITE_GOOGLE_CLIENT_ID=ваш_client_id.apps.googleusercontent.com
+
+5. Команды (консоль OSPanel, в папке проекта):
+   php artisan config:clear
+   php artisan migrate
+   php artisan test
+   php artisan serve
+   и в другой консоли, в папке frontend:  npm run dev
+
+6. Проверка: http://localhost:5173/login -> кнопка «Войти через Google»; «Забыли пароль?» -> письмо на почту.
+   Секреты (.env, пароль приложения) в git не добавлять.

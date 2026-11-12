@@ -2,9 +2,10 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth'
 import { FormErrors } from '../components/ui'
+import GoogleButton from '../components/GoogleButton'
 
 export default function Register() {
-  const { register } = useAuth()
+  const { register, loginWithGoogle } = useAuth()
   const nav = useNavigate()
   const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', password_confirmation: '' })
   const [error, setError] = useState(null)
@@ -23,10 +24,23 @@ export default function Register() {
     }
   }
 
+  // Первый вход через Google создаёт учётную запись клиента автоматически
+  const google = async (credential) => {
+    setError(null)
+    try {
+      await loginWithGoogle(credential)
+      nav('/')
+    } catch (err) {
+      setError(err)
+    }
+  }
+
   return (
     <form className="card narrow" onSubmit={submit}>
       <h1>Регистрация</h1>
       <FormErrors error={error} />
+      <GoogleButton onCredential={google} onError={setError} />
+      <div className="divider">или заполните форму</div>
       <label>Имя<input value={form.name} onChange={set('name')} required /></label>
       <label>Email<input type="email" value={form.email} onChange={set('email')} required /></label>
       <label>Телефон<input value={form.phone} onChange={set('phone')} placeholder="+77010000000" /></label>

@@ -34,13 +34,20 @@ export function AuthProvider({ children }) {
     setUser(r.user.data ?? r.user)
   }
 
+  // Вход через Google: ID-токен проверяет сервер, при первом входе создаётся учётная запись клиента
+  const loginWithGoogle = async (credential) => {
+    const r = await api.post('/auth/google', { credential })
+    setToken(r.token)
+    setUser(r.user.data ?? r.user)
+  }
+
   const logout = async () => {
     try { await api.post('/auth/logout') } catch { /* токен мог уже истечь */ }
     logoutLocal()
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, setUser }}>
+    <AuthContext.Provider value={{ user, loading, login, loginWithGoogle, register, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   )

@@ -46,6 +46,12 @@ class User extends Authenticatable
         return $this->hasMany(Membership::class);
     }
 
+        /** Операции по балансу. */
+    public function walletTransactions(): HasMany
+    {
+        return $this->hasMany(WalletTransaction::class);
+    }
+
     /** Занятия, которые ведёт тренер (внешний ключ trainer_id). */
     public function scheduleItems(): HasMany
     {

@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\GoogleAuthController;
+use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\MembershipController;
 use App\Http\Controllers\Api\MembershipTypeController;
@@ -15,6 +17,7 @@ use App\Http\Controllers\Api\WorkoutController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\WalletController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -43,6 +46,13 @@ Route::prefix('v1')->name('v1.')->group(function () {
     // ---------- Открытые маршруты (без токена) ----------
     Route::post('auth/register', [AuthController::class, 'register'])->name('auth.register');
     Route::post('auth/login', [AuthController::class, 'login'])->name('auth.login');
+    Route::post('auth/google', [GoogleAuthController::class, 'store'])->name('auth.google');
+    Route::post('auth/forgot-password', [PasswordResetController::class, 'forgot'])
+        ->middleware('throttle:6,1')
+        ->name('auth.forgot-password');
+    Route::post('auth/reset-password', [PasswordResetController::class, 'reset'])
+        ->middleware('throttle:6,1')
+        ->name('auth.reset-password');
 
     Route::apiResource('workouts', WorkoutController::class)
         ->only(['index', 'show']);
@@ -89,6 +99,9 @@ Route::prefix('v1')->name('v1.')->group(function () {
         Route::middleware('role:client')->group(function () {
             Route::get('memberships', [MembershipController::class, 'index'])->name('memberships.index');
             Route::post('memberships', [MembershipController::class, 'store'])->name('memberships.store');
+
+                        Route::get('wallet', [WalletController::class, 'show'])->name('wallet.show');
+            Route::post('wallet/top-up', [WalletController::class, 'topUp'])->name('wallet.top-up');
 
             Route::get('bookings', [BookingController::class, 'index'])->name('bookings.index');
             Route::post('schedule-items/{schedule_item}/bookings', [BookingController::class, 'store'])
