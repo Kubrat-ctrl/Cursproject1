@@ -30,14 +30,16 @@ async function request(method, path, { params, body } = {}) {
   const headers = { Accept: 'application/json' }
   const token = getToken()
   if (token) headers.Authorization = `Bearer ${token}`
-  if (body !== undefined) headers['Content-Type'] = 'application/json'
+  const isForm = body instanceof FormData
+  // Для FormData Content-Type не задаём: браузер сам добавит multipart/form-data с boundary
+  if (body !== undefined && !isForm) headers['Content-Type'] = 'application/json'
 
   let res
   try {
     res = await fetch(BASE + path + query(params), {
       method,
       headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
     })
   } catch {
     throw new ApiError(0, 'Сервер недоступен. Проверьте, что запущен php artisan serve')

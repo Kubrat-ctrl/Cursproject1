@@ -43,3 +43,12 @@ input, select, textarea { font:inherit; padding:7px 9px; border:1px solid #cbd5e
 .price { font-size:22px; font-weight:700; margin:4px 0; }
 .pager { display:flex; gap:14px; align-items:center; margin-top:14px; font-size:14px; }
 pre { background:#f3f4f6; padding:10px; border-radius:6px; overflow:auto; font-size:13px; }
+
+.field-error { color: var(--danger); font-size: 12px; }
+label.has-error input, label.has-error select, label.has-error textarea { border-color: var(--danger); }
+.cover { width: 100%; max-height: 260px; object-fit: cover; border-radius: 6px; margin-bottom: 12px; }
+.card.detail { max-width: 760px; }
+table.props { border: none; background: none; margin: 12px 0; }
+table.props th { background: none; width: 180px; color: var(--muted); font-weight: 500; }
+.thumb.preview { max-width: 200px; height: 110px; }
+a.btn { display: inline-block; }

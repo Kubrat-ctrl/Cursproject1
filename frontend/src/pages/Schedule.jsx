@@ -1,26 +1,30 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { api } from '../api'
 import { useAuth } from '../auth'
-import { useFetch, Status, Pager, Flash, FormErrors } from '../components/ui'
+import { useFetch, Status, Pager, Flash } from '../components/ui'
+import ScheduleForm from '../components/ScheduleForm'
 import { dt, SCHEDULE_STATUS } from '../format'
-
-const emptyForm = { workout_id: '', trainer_id: '', starts_at: '', ends_at: '', room: '', capacity: '' }
 
 export default function Schedule() {
   const { user } = useAuth()
-  const [filters, setFilters] = useState({ search: '', date_from: '', date_to: '', sort: 'starts_at', order: 'asc' })
+  const isAdmin = user?.role === 'admin'
+  const [filters, setFilters] = useState({ search: '', workout_id: '', date_from: '', date_to: '', sort: 'starts_at', order: 'asc' })
   const [applied, setApplied] = useState(filters)
   const [page, setPage] = useState(1)
   const [flash, setFlash] = useState(null)
-  const [formErr, setFormErr] = useState(null)
-  const [form, setForm] = useState(emptyForm)
   const [showForm, setShowForm] = useState(false)
 
+  // Параметры фильтрации, поиска, сортировки и страницы уходят в строку запроса к API
   const list = useFetch(() => api.get('/schedule-items', { ...applied, page, per_page: 10 }), [applied, page])
-  const workouts = useFetch(() => (user?.role === 'admin' ? api.get('/workouts', { per_page: 50 }) : Promise.resolve(null)), [user?.role])
-  const trainers = useFetch(() => (user?.role === 'admin' ? api.get('/users', { role: 'trainer', per_page: 50 }) : Promise.resolve(null)), [user?.role])
+  const workouts = useFetch(() => api.get('/workouts', { is_active: 1, per_page: 50 }), [])
+  const trainers = useFetch(() => (isAdmin ? api.get('/users', { role: 'trainer', per_page: 50 }) : Promise.resolve(null)), [isAdmin])
 
   const apply = (e) => { e.preventDefault(); setPage(1); setApplied(filters) }
+  const reset = () => {
+    const empty = { search: '', workout_id: '', date_from: '', date_to: '', sort: 'starts_at', order: 'asc' }
+    setFilters(empty); setApplied(empty); setPage(1)
+  }
 
   const book = async (id) => {
     setFlash(null)
@@ -45,18 +49,11 @@ export default function Schedule() {
     }
   }
 
-  const create = async (e) => {
-    e.preventDefault()
-    setFormErr(null)
-    try {
-      await api.post('/schedule-items', { ...form, capacity: Number(form.capacity) })
-      setForm(emptyForm)
-      setShowForm(false)
-      setFlash({ type: 'ok', text: 'Занятие добавлено в расписание' })
-      list.reload()
-    } catch (err) {
-      setFormErr(err)
-    }
+  const create = async (body) => {
+    await api.post('/schedule-items', body)
+    setShowForm(false)
+    setFlash({ type: 'ok', text: 'Занятие добавлено в расписание' })
+    list.reload()
   }
 
   const items = list.data?.data ?? []
@@ -68,6 +65,10 @@ export default function Schedule() {
 
       <form className="filters" onSubmit={apply}>
         <input placeholder="Поиск: занятие или тренер" value={filters.search} onChange={(e) => setFilters({ ...filters, search: e.target.value })} />
+        <select value={filters.workout_id} onChange={(e) => setFilters({ ...filters, workout_id: e.target.value })}>
+          <option value="">Все занятия</option>
+          {workouts.data?.data.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
+        </select>
         <label>с <input type="date" value={filters.date_from} onChange={(e) => setFilters({ ...filters, date_from: e.target.value })} /></label>
         <label>по <input type="date" value={filters.date_to} onChange={(e) => setFilters({ ...filters, date_to: e.target.value })} /></label>
         <select value={filters.sort} onChange={(e) => setFilters({ ...filters, sort: e.target.value })}>
@@ -76,36 +77,23 @@ export default function Schedule() {
           <option value="room">По залу</option>
         </select>
         <select value={filters.order} onChange={(e) => setFilters({ ...filters, order: e.target.value })}>
-          <option value="asc">↑</option>
-          <option value="desc">↓</option>
+          <option value="asc">По возрастанию</option>
+          <option value="desc">По убыванию</option>
         </select>
         <button className="btn primary">Применить</button>
+        <button type="button" className="btn" onClick={reset}>Сбросить</button>
       </form>
 
-      {user?.role === 'admin' && (
+      {isAdmin && (
         <div className="card">
           <button className="btn" onClick={() => setShowForm(!showForm)}>{showForm ? 'Скрыть форму' : '+ Добавить занятие'}</button>
           {showForm && (
-            <form className="grid" onSubmit={create}>
-              <FormErrors error={formErr} />
-              <label>Вид занятия
-                <select value={form.workout_id} onChange={(e) => setForm({ ...form, workout_id: e.target.value })} required>
-                  <option value="">—</option>
-                  {workouts.data?.data.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
-                </select>
-              </label>
-              <label>Тренер
-                <select value={form.trainer_id} onChange={(e) => setForm({ ...form, trainer_id: e.target.value })} required>
-                  <option value="">—</option>
-                  {trainers.data?.data.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-                </select>
-              </label>
-              <label>Начало<input type="datetime-local" value={form.starts_at} onChange={(e) => setForm({ ...form, starts_at: e.target.value })} required /></label>
-              <label>Конец<input type="datetime-local" value={form.ends_at} onChange={(e) => setForm({ ...form, ends_at: e.target.value })} required /></label>
-              <label>Зал<input value={form.room} onChange={(e) => setForm({ ...form, room: e.target.value })} required /></label>
-              <label>Мест<input type="number" min="1" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} required /></label>
-              <button className="btn primary">Создать</button>
-            </form>
+            <ScheduleForm
+              workouts={workouts.data?.data}
+              trainers={trainers.data?.data}
+              submitLabel="Создать"
+              onSubmit={create}
+            />
           )}
         </div>
       )}
@@ -124,18 +112,19 @@ export default function Schedule() {
                 return (
                   <tr key={s.id} className={active ? '' : 'dim'}>
                     <td>{dt(s.starts_at)}</td>
-                    <td>{s.workout?.name}</td>
+                    <td><Link to={`/schedule/${s.id}`}>{s.workout?.name}</Link></td>
                     <td>{s.trainer?.name}</td>
                     <td>{s.room}</td>
                     <td>{free} из {s.capacity}</td>
                     <td>{SCHEDULE_STATUS[s.status] ?? s.status}</td>
                     <td className="actions">
+                      <Link className="btn small" to={`/schedule/${s.id}`}>Подробнее</Link>
                       {user?.role === 'client' && active && (
                         <button className="btn small primary" disabled={free <= 0} onClick={() => book(s.id)}>
                           {free <= 0 ? 'Мест нет' : 'Записаться'}
                         </button>
                       )}
-                      {user?.role === 'admin' && active && (
+                      {isAdmin && active && (
                         <button className="btn small danger" onClick={() => cancelItem(s.id)}>Отменить</button>
                       )}
                     </td>

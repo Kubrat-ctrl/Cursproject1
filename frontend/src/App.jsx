@@ -4,6 +4,7 @@ import Layout from './components/Layout'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Schedule from './pages/Schedule'
+import ScheduleDetail from './pages/ScheduleDetail'
 import Workouts from './pages/Workouts'
 import MembershipTypes from './pages/MembershipTypes'
 import MyMemberships from './pages/MyMemberships'
@@ -27,6 +28,7 @@ export default function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<Schedule />} />
+        <Route path="/schedule/:id" element={<ScheduleDetail />} />
         <Route path="/workouts" element={<Workouts />} />
         <Route path="/membership-types" element={<MembershipTypes />} />
         <Route path="/login" element={<Login />} />

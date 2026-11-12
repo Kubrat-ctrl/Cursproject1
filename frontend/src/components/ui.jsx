@@ -50,3 +50,21 @@ export function Flash({ flash }) {
   if (!flash) return null
   return <div className={`alert ${flash.type}`}>{flash.text}</div>
 }
+
+// Преобразует ответ 422 { errors: { field: ['сообщение'] } } в { field: 'сообщение' }
+export function serverErrs(error) {
+  const out = {}
+  Object.entries(error?.errors || {}).forEach(([k, v]) => { out[k] = v[0] })
+  return out
+}
+
+// Поле формы: подпись, элемент ввода и сообщение об ошибке рядом с ним
+export function Field({ label, error, children }) {
+  return (
+    <label className={error ? 'has-error' : ''}>
+      {label}
+      {children}
+      {error && <span className="field-error">{error}</span>}
+    </label>
+  )
+}
